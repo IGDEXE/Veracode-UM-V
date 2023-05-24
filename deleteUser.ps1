@@ -126,3 +126,4 @@ catch {
     Write-Host "Erro no Powershell:"
     Write-Error "$ErrorMessage"
 }
+Stop-Transcript

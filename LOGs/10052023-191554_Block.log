@@ -1,612 +1,0 @@
-**********************
-PowerShell transcript start
-Start time: 20230510191554
-Username: M3CORP-NOTE-14\IGD75
-RunAs User: M3CORP-NOTE-14\IGD75
-Configuration Name: 
-Machine: M3CORP-NOTE-14 (Microsoft Windows NT 10.0.22621.0)
-Host Application: C:\Program Files\PowerShell\7\pwsh.dll
-Process ID: 41956
-PSVersion: 7.3.4
-PSEdition: Core
-GitCommitId: 7.3.4
-OS: Microsoft Windows 10.0.22621
-Platform: Win32NT
-PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.10032.0, 6.0.0, 6.1.0, 6.2.0, 7.0.0, 7.1.0, 7.2.0, 7.3.4
-PSRemotingProtocolVersion: 2.3
-SerializationVersion: 1.1.0.1
-WSManStackVersion: 3.0
-**********************
-Transcript started, output file is .\LOGs\10052023-191554_Block.log
-Usuario foi bloqueado:
-Joao Silva
-prevendas+testeum5401181304@m3corp.com.br
-19:15 10/05/2023
-PS D:\Git\Veracode-UM-V> .\blockuser.ps1 "prevendas+testeUM5401181304@m3corp.com.br"
-Transcript started, output file is .\LOGs\10052023-191707_Block.log
-Usuario foi bloqueado:
-Joao Silva
-prevendas+testeum5401181304@m3corp.com.br
-19:17 10/05/2023
-PS D:\Git\Veracode-UM-V> cls
-PS D:\Git\Veracode-UM-V> $emailUsuario
-prevendas+testeUM5101461304@m3corp.com.br
-PS D:\Git\Veracode-UM-V> $idUsuario = Get-VeracodeUserID $emailUsuario
-PS D:\Git\Veracode-UM-V> $infoUsers = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/users?size=1000" | ConvertFrom-Json
-PS D:\Git\Veracode-UM-V> $infoUsers = $infoUsers._embedded.users
-PS D:\Git\Veracode-UM-V> $userID = ($infoUsers | Where-Object { $_.user_name -eq "$emailUsuario" })
-PS D:\Git\Veracode-UM-V> $userID
-
-user_id        : 78808c93-919d-40fb-8f8e-93c021483a19
-user_legacy_id : 783497
-user_name      : prevendas+testeum5101461304@m3corp.com.br
-first_name     : Joao
-last_name      : Silva
-email_address  : prevendas+testeUM5101461304@m3corp.com.br
-saml_user      : False
-login_enabled  : False
-_links         : @{self=}
-
-
-PS D:\Git\Veracode-UM-V> function Get-UserInfo {
-    param (
-        [parameter(position=0,Mandatory=$True,HelpMessage="Email da conta conforme cadastrado na Veracode (Caso seja uma conta de API, informar o UserName dela)")]
-        $emailUsuario
-    )
-    try {
-        $infoUsers = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/users?size=1000" | ConvertFrom-Json
-        $validador = Debug-VeracodeAPI $infoUsers
-        if ($validador -eq "OK") {
-            $infoUsers = $infoUsers._embedded.users
-            $userInfo = ($infoUsers | Where-Object { $_.user_name -eq "$emailUsuario" })
-            if ($userInfo) {
-                $nome = $userInfo.first_name
-                $sobrenome = $userInfo.last_name
-                $email = $userInfo.email_address
-                $infoUsuarios = "$nome $sobrenome"
-                $infoUsuarios += "$email"
-                return $infoUsuarios
-            } else {
-                # Exibe a mensagem de erro
-                Write-Error "Não foi encontrado ID para o usuario: $emailUsuario"
-            }
-            
-        } else {
-            # Exibe a mensagem de erro
-            Write-Error "Algo não esperado ocorreu"
-        }
-    }
-    catch {
-        $ErrorMessage = $_.Exception.Message
-        Write-Host "Erro no Powershell:"
-        Write-Host "$ErrorMessage"
-    }
-}
-PS D:\Git\Veracode-UM-V> cls
-PS D:\Git\Veracode-UM-V> $infos = Get-UserInfo $emailUsuario
-PS D:\Git\Veracode-UM-V> $infos
-Joao Silvaprevendas+testeUM5101461304@m3corp.com.br
-PS D:\Git\Veracode-UM-V> function Get-UserInfo {
-    param (
-        [parameter(position=0,Mandatory=$True,HelpMessage="Email da conta conforme cadastrado na Veracode (Caso seja uma conta de API, informar o UserName dela)")]
-        $emailUsuario
-    )
-    try {
-        $infoUsers = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/users?size=1000" | ConvertFrom-Json
-        $validador = Debug-VeracodeAPI $infoUsers
-        if ($validador -eq "OK") {
-            $infoUsers = $infoUsers._embedded.users
-            $userInfo = ($infoUsers | Where-Object { $_.user_name -eq "$emailUsuario" })
-            if ($userInfo) {
-                $nome = $userInfo.first_name
-                $sobrenome = $userInfo.last_name
-                $email = $userInfo.email_address
-                $infoUsuarios = "$nome $sobrenome`n$email"
-                return $infoUsuarios
-            } else {
-                # Exibe a mensagem de erro
-                Write-Error "Não foi encontrado ID para o usuario: $emailUsuario"
-            }
-            
-        } else {
-            # Exibe a mensagem de erro
-            Write-Error "Algo não esperado ocorreu"
-        }
-    }
-    catch {
-        $ErrorMessage = $_.Exception.Message
-        Write-Host "Erro no Powershell:"
-        Write-Host "$ErrorMessage"
-    }
-}
-PS D:\Git\Veracode-UM-V> $infos = Get-UserInfo $emailUsuario
-PS D:\Git\Veracode-UM-V> $infos
-Joao Silva
-prevendas+testeUM5101461304@m3corp.com.br
-PS D:\Git\Veracode-UM-V> .\deleteUser.ps1 "$emailUsuario"
-Usuario foi deletado:
-Joao Silva
-prevendas+testeUM5101461304@m3corp.com.br
-19:29 10/05/2023
-PS D:\Git\Veracode-UM-V> .\deleteUser.ps1 "$emailUsuario"
-
-Write-Error: D:\Git\Veracode-UM-V\deleteUser.ps1:103
-Line |
- 103 |      $idUsuario = Get-VeracodeUserID $emailUsuario
-     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | Não foi encontrado ID para o usuario: prevendas+testeUM5101461304@m3corp.com.br
-
-Get-VeracodeUserID: D:\Git\Veracode-UM-V\deleteUser.ps1:103
-Line |
- 103 |      $idUsuario = Get-VeracodeUserID $emailUsuario
-     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | Não foi encontrado ID para o usuario: prevendas+testeUM5101461304@m3corp.com.br
-
-Transcript started, output file is .\LOGs\10052023-192956_Block.log
-PS D:\Git\Veracode-UM-V> .\deleteUser.ps1 "$emailUsuario"
-Transcript started, output file is .\LOGs\10052023-193027_Block.log
-
-Write-Error: D:\Git\Veracode-UM-V\deleteUser.ps1:108
-Line |
- 108 |      $idUsuario = Get-VeracodeUserID $emailUsuario
-     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | Não foi encontrado ID para o usuario: prevendas+testeUM5101461304@m3corp.com.br
-
-Get-VeracodeUserID: D:\Git\Veracode-UM-V\deleteUser.ps1:108
-Line |
- 108 |      $idUsuario = Get-VeracodeUserID $emailUsuario
-     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | Não foi encontrado ID para o usuario: prevendas+testeUM5101461304@m3corp.com.br
-
-PS D:\Git\Veracode-UM-V> .\deleteUser.ps1 "$emailUsuario"
-Transcript started, output file is .\LOGs\10052023-193042_Delete.log
-
-Write-Error: D:\Git\Veracode-UM-V\deleteUser.ps1:108
-Line |
- 108 |      $idUsuario = Get-VeracodeUserID $emailUsuario
-     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | Não foi encontrado ID para o usuario: prevendas+testeUM5101461304@m3corp.com.br
-
-Get-VeracodeUserID: D:\Git\Veracode-UM-V\deleteUser.ps1:108
-Line |
- 108 |      $idUsuario = Get-VeracodeUserID $emailUsuario
-     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | Não foi encontrado ID para o usuario: prevendas+testeUM5101461304@m3corp.com.br
-
-PS D:\Git\Veracode-UM-V> $emailUsuario = "prevendas+testeUM1109170504@m3corp.com.br"
-PS D:\Git\Veracode-UM-V> cls
-PS D:\Git\Veracode-UM-V> $infoUsers = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/users?size=1000" | ConvertFrom-Json
-PS D:\Git\Veracode-UM-V> $infoUsers = $infoUsers._embedded.users
-PS D:\Git\Veracode-UM-V>             $userInfo = ($infoUsers | Where-Object { $_.user_name -eq "$emailUsuario" })
-PS D:\Git\Veracode-UM-V> $userInfo
-
-user_id        : c19adfe4-2497-47ff-8da8-17a7d438792d
-user_legacy_id : 781326
-user_name      : prevendas+testeum1109170504@m3corp.com.br
-first_name     : Joao
-last_name      : Silva
-email_address  : prevendas+testeUM1109170504@m3corp.com.br
-saml_user      : False
-login_enabled  : True
-_links         : @{self=}
-
-
-PS D:\Git\Veracode-UM-V> $userInfo._links
-
-self
-----
-@{href=https://api.veracode.com/api/authn/v2/users/c19adfe4-2497-47ff-8da8-17a7d438792d}
-
-PS D:\Git\Veracode-UM-V> $caminhoCSV = "D:\Git\Veracode-UM-V\Templates\template.csv"
-PS D:\Git\Veracode-UM-V> $Header = "Nome", "Sobrenome", "Email", "Cargo", "Time", "NovoTime"
-PS D:\Git\Veracode-UM-V> $infoUsuario = Import-Csv -Path "$caminhoCSV" -Header $Header
-PS D:\Git\Veracode-UM-V> $infoUsuario
-
-Nome      : PK     ! b�h^  �   [Content_Types].xml �(�                                                                                        
-                                                                                                                                                           
-                                                                                                                                                           
-                                                                                                                                                       ���N
-            �0E�H�C�-Jܲ@5��*Q>�ēƪc[�ii����B�j7���{2��h�nm���ƻR����U^7/���%��rZY�@1__�f� �q��R4D�AJ�h>����V�ƹ�Z�9����NV�8ʩ����ji){^��-I
-            �"{�v^�P!XS)bR�r��K�s(�3�`c�0��������7M4�����ZƐk+�|\|z�(���P��6h_-[�@�!��� Pk���2n�}�?�L��� ��%���d����dN"m
-Sobrenome : �ǞDO97*�~��ɸ8�O�c|n���E������B��!$}�����;{���[����2�  �� PK     ! �U0#�   L   _rels/.rels �(�                             
-                                                                                                                                                           
-                                                                                                                                                           
-                                                                                                                                                           
-                                                                   ��MO�0��H�����ݐBKwAH�!T~�I����$ݿ'T�G�~����<���!��4��;#�w����qu*&r�Fq���v���
-            ��GJy(v��*����K��#F��D��.W	��=��Z�MY�b���BS�����7��ϛז��
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ?�9L�ҙ�sbgٮ|�l!��USh9i�b�r:"y_dl��D���|-N��R"4�2�G�%��Z�4�˝y�7	ë��ɂ���  �� PK     ! �nQ�  �     xl/workbook.xml�UMo�0�����N�
-            @H�J�$$���U���%R�� fmӤ���w!i�K�]�،���<��<3����!�g62h����N�sdHE��d��!z�]����p�^p�6 ��!J�*˒qJs"�xI�
-Sobrenome : �ȉS�
-Email     : Y
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : J�R���rl۷r�
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : � �#|�d1�x\�P
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��Q@_���-Z.'b]�f�� 
-Sobrenome : c�EF�U�Yd�w����l��;��d��łK�Tg m5�O�Ƕ��Q
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��9��g	��t
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ����IV��?�a��h�Uk%��}�����Œe����A���u�2ddD�q�MB��o�a�U9�X^�w�.��{9�P�A��(��#^(�ڎ�WeUc�R"6n蟊
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : g$��H�
-Sobrenome : 䌨ԨD�(��`jA8�Լ�6��4/A�T��H����DHb��n�5��s E�
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : m�����
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ���<A����dN!��}
-Sobrenome : b��{�zQ4���������p�u���O�����+#� �R鮪:D���uM���AŒ�{w�z~7��W��_��n���4��H�&D&���=��������\��j�~R�J�1v<�:��Bt�(jM��|L&G��7��N
-            ���(ju�2R`�Ⱥ��91z1Mp]����d�Lz���v�t����gvس]��P������ss�Eθ�G�aG�G7����Z�A��
-Email     : S"�-�|
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ߝ�	zj� ǖ�վ��  �� PK     ! �>���   �   xl/_rels/workbook.xml.rels �(�                                                        
-                                                                                                                                                           
-                                                                      �RMK�0���0w�v�t/"�U�ɴ)�&!3~��*�]X�K/o�y���v�5���+��zl�;o���b���G
-            �����s�>��
-Sobrenome : �8��(%���"D��҆4j�0u2js��MY�˴���S쭂��� �)f���C����y��	I<
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : y ���!+��E���fMy�k�����K�5=|�t ��G)�s墙�U��tB��)���
-Sobrenome : ���f�����   �� PK     ! o���4  
-Email     :      xl/worksheets/sheet1.xml��ێ�0��+�
-Cargo     : �c�f�����wU�׎�S�9��wpB�R.�.�����1���`4ف�ʶ%�IJ	��V�]�����hJ�����-���>-޿���� $���M]���
-Time      : 
-NovoTime  : 
-
-Nome      : ��A�3�uF|uk�;����fY�N���'B��aغV���h�
-            �@���}�:?Ќ�g��l����C�Ji�J���˺�N�4�}�c!����2q�F�(鬷uH��N�oӟ��B���.3;��+*{�%�paeWX�F����[U��wz�Fyߤ�f��C�J��"�~��2�l1���C�޿�
-            V_A�����<W�n��/8�"��=QȠv��.���_Q�(�.
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ����2�gG*��V�/v�	Ժ	(;NƘh_)Eu|/�DQ:�Xi52�%Fᯆ�k�!ƽ�B��qa��9�(Y�K�C)�[��y^�[�P�{�`(<�N'�|�x?]G
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : Ɓ�'�!P
-Sobrenome : 0�������.X<��   ��   ������
-            ��Wa<@���;�U�{0b�ʜ0���X�u�~��� ��\�&�����K��h�Om��S�ƶחv޺!t��T\�]F�8�_<�Ϫ 1+�g'j2�3�25M�J�B�N����&�*����lLk�4j�,m��g���>��Y
-            5�m�Op]�7Q�7�  ��   ��L��
-            �@F_e��ɟiRD�tZ��Wg��NTD�^F�s��wR���3�s�����!0JL�� ؝��bOɽ�J��@�|+�ǑR\�*.�pW�U�/O������TSgƙغ�M�)�N����]%��u�^V�X7H�
-            `��n�%r�����o   �� PK     ! M?�,�  �     xl/theme/theme1.xml�Y�o�6��� ��Z�%���l'k��h�=�6m��DC��E�]w0�v��À�i��7-���#%[dL7��
-            ��$�{��{��C�o<N�s�3NX�qk�<���MI:��G�J�u�@�Q�⎻�ܽ���g�ў�q��O�긱��j�O��kl�Sx6cY��f��4C��7�պ����uR���;��`g$]��k�
-            ���aB��
-            ;=�I_�f������~,\�.�A��ԟ[ݿ^E{�;l5���+�
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��i]���ǛN}?���ƿP��4� ��S 4��Hs.�Ϡ�������K��~�ߨx�c�s7�?�@�?FE�@9>�ĤY�|�@9>��7�n�ox�)IO��^6��h7���Vx;���z�DA5l�Kv1c��Uk	
-            zĲ! $�"ARG�x�&P��d���c(�J�f��
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ���?_]���=�4k���&��ᓌ
-Sobrenome : Dǽ	^]
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : �p�0�IѫrbX�t�[����~������^=�.��"�����~��?_��Z����_��������3��n��:|D̝��ܹ���?gog1�1
-Sobrenome : P�-�8x{��
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��fd�/6�����$Ζ�Xz�'�1�c�5 �d_Z�G�tn�<[�{����Pj$x�\����(�ͻ��q��#��S�-�{H��c2�g3�<$NkHFdlRitH���FRm�����c�6�>>3��Z j!?���Z
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��\�PB��!�H�����p��cʜ�sn����x���m������	rj�y�ӑ}v�(YX9�4ֱ_�S(Q��e�?f�"�!(ݙ��\���O��%������V*�o�yB�K����Z���|jnw�>:�͈�m:
-            ��޻p�A��ez�k�=g}��O����%{׻|�B]j3�v�>W��d�b}F(=+���Z�s���ChT	���l�1\[7ϐ�q2&�$">���5�������;�a����&_�v��M�=j�&���xp$�v/ش��B��Y�6��Nv�
-            ��k��mHh��$�u#d�u$�Ȯ�E�¢%ݯS���&@m�X29��긁���a�(��<�� ����\i�w�� �u��nK�;�'G���d� 
-            ���IB+�MqQ��a�U�]�Ԡ'C�~J�ևȵ��@S])h�wܰ�y�-:���p�
-Sobrenome : �v�\�":������]�e�q�G<��D'W���9�$WS
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : 4U���� -�6���F�n&�fx"��k-2��-(|�֧����Ғ-!�'����evA�͚��p8��ќ8��YY&�Bv�CDUCy;��3�.�9\�膎���@�+���x.'���u/��e�4�
-Sobrenome : �LCU�i�7�k��I�`�K��6�R��k��B���̺o0!h���j��K�.ZMjW�
-            �"��f��F�]g~��X�r�X�+U᫏��6~�ч��%\��6d}��q.��<���eF:�/��Q=�*^+T���UZA�Q�A�6j^�W
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ���Z�h�]�[T��'�d}�vm*S�T�����R������'a}�n�{a���+~�ת���W�Q�?�GA�=|�:g
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : �w�Z��E?�$�V��������~�i������Q�«x��  �� PK     ! �p�_  �  
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      :    xl/styles.xml�U[o�0~�����N
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : 4dITMS�J[U���WLj�dLG6����@C׭����>>�;߹��u�{�T7L��'�
-Sobrenome : T��.E_�r���Y�$Mў6�
-Email     : {�.i̞��{J��Iѽ1�
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : 㦸��4'��^*�1p�;�Ԛ���F��(�X&Q��������/���a[ƙ�;
-Sobrenome : �bu��J�-�]8#�ׅsy��8�?�Z5�2'��UU������KL� �
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : )�q=���oD�aM�-ʒJI�x�j�IQDm
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : VR}��}�
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ZY�|�	I�p��+�(d�I$�׸ �m5�j��{qd�ڃ�`�{+ĖG�&KZ�����Z���l�)�|��^�%�+�j�ë7���5�*��{���O�&�0�'�9̒��%�ј|��^�%�Vb�lwo����w���V˒�����ۼ��
-            �)(�vԾVϢ�*O�"�L���x�@�c��_ �oF!����#u��׭�R��Ivޜ���p[���s�vRPۈ@��hehaܦqU����X���c���� 8v�gR�g%x"���M�GVS͙|��s
-            �ۖqäe�pc6�s���9�$jb�[��G������\{<1��V�����1E��gZ�V�n�nأ2"E��'۫��R�����4ÿ�j������e��`��g�4���z�ǳ��f�/�(��9ٷGl[�y��
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : g���N�C��ۃ
-Sobrenome : E�KO�M)Оr_F��<??
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : B6'1?��<��|����x�=~�Vp��ݒ�W�
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : �1�j��T
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : E��+A�����~  �� PK     ! �3Ce�   �     xl/sharedStrings.xmll�1O�0�w$���8�r\D[�.-�&�&���s
-Sobrenome : ���BB(��޻�����+x�!�#l䪪� l�s�7���r� '������o`�1�7�9��En��������%9S6{�c�� ��W뺾W�:���
-            Sٻ�bB�9���0����(�V�huѿޑ>"��`_�~>�����yrK�2]�_�.�G糝C��e�R�';`�L>CGq��Y<�iy��R���  �� PK     ! �l
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : �   <  #   xl/worksheets/_rels/sheet1.xml.rels�ϱj1��w0�{�t(%�/�B�.%} a��Ll��NH޾�Ph��M�Gߏ��5u�\���U׃"��<�>�oO��JEv����
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : l�Ǉ��vT��j
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : K�i�u�E
-Sobrenome : �$�L�#ֶ�Y'�'�I?���ο
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : �Lup���@o�5�o�4yK;��H\���K�r�|j(晪��>TY����Y�?ѻ�ֺ�Vʌ�8軟�/   �� PK     ! �X�H  a   docProps/core.xml �(�                    
-                                                                                                                                                           
-                                                                                                          |�[K�0���C�}�ܘ��@�@p
-            8Q�ɷ��H��{�v�/��͓'��Q{0�R�@I� $S��������Q�i�$���ۛ�i��4W�
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : <IZ�t�v�i��e;�F�!}�QFP�f�5e_t8��)�(���ꁈNH���6u�C
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��8���u`���@����rG��t��9�á}��Pl�&j�N��'�c���=5�d;+��9#� uʔO{
-Sobrenome : *js<�lXS�V~֛
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��qԻ�<����/Dz�s�=.�KT�q2	�iO�Ɍ$�$��l��8�
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : ��$�/1�<.L�u����x�9���   �� PK     ! 6��9�     docProps/app.xml �(�                                                         
-                                                                                                                                                           
-                                                                     ��Ao�0����9�P��bH[��a����t
-Sobrenome : L��5����6�8�N��|�ӧ'��C�S��Wb�(E�ބ��}%^vO�_D�	|
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : .x�����W��&���
-Sobrenome : �-|�DKWRf�by��g�	��6�ehk�!��=ɛ���x �5���d(&�UO�kZ3����12�V_ct� �-�wkRȡ���`�)9�mѼ%KG]*9o�ր�5�\F%���0����V=�z4R��o��F?!�S��O�5�M�
-            X��)�o]YI֧�X�W������������%�Β����@� /��#Ä{F�����>X�C�Y8U߬��_�.< �{��C�m!a����>
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : �3��`�n��~��[��u��zy�(oK~��L��O�   �� PK-      ! b�h^  �                   [Content_Types].xmlPK-      ! �U0#�   L           
-                �  _rels/.relsPK-      ! �nQ�  �               �  xl/workbook.xmlPK-      ! �>���   �               �
-              xl/_rels/workbook.xml.relsPK-      ! o���4  
-Sobrenome :                �  xl/worksheets/sheet1.xmlPK-      ! M?�
-Email     : �  �               h  xl/theme/theme1.xmlPK-      ! �p�_  �  
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      :                xl/styles.xmlPK-      ! �3Ce�   �               M  xl/sharedStrings.xmlPK-      ! �l
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : �   <  #             e  xl/worksheets/_rels/sheet1.xml.relsPK-      ! �X�H  a               u  docProps/core.xmlPK-      ! 6�
-            �9�                 �  docProps/app.xmlPK      �  �     
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-
-PS D:\Git\Veracode-UM-V> cls
-PS D:\Git\Veracode-UM-V> $infoUsuario = Import-Csv -Path "$caminhoCSV" -Header $Header
-PS D:\Git\Veracode-UM-V> $infoUsuario
-
-Nome      : Nome;Sobrenome;Email;Cargo;Time;NovoTime
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-Nome      : Joao;Silva;m@mail.com;Desenvolvedor;DEVs;Sim
-Sobrenome : 
-Email     : 
-Cargo     : 
-Time      : 
-NovoTime  : 
-
-
-PS D:\Git\Veracode-UM-V> $infoUsuario = Import-Csv -Path "$caminhoCSV" -Header $Header -Delimiter ";"
-PS D:\Git\Veracode-UM-V> $infoUsuario
-
-Nome      : Nome
-Sobrenome : Sobrenome
-Email     : Email
-Cargo     : Cargo
-Time      : Time
-NovoTime  : NovoTime
-
-Nome      : Joao
-Sobrenome : Silva
-Email     : m@mail.com
-Cargo     : Desenvolvedor
-Time      : DEVs
-NovoTime  : Sim
-
-
-PS D:\Git\Veracode-UM-V> cls
-PS D:\Git\Veracode-UM-V> $infoUsuario = Get-Content -Path "$caminhoCSV" | Select-Object -Skip 1 | ConvertFrom-Csv -Header $Header -Delimiter ";"
-PS D:\Git\Veracode-UM-V> $infoUsuario
-
-Nome      : Joao
-Sobrenome : Silva
-Email     : m@mail.com
-Cargo     : Desenvolvedor
-Time      : DEVs
-NovoTime  : Sim
-
-
-PS D:\Git\Veracode-UM-V> $infoUsuario.Nome
-Joao

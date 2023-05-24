@@ -113,40 +113,19 @@ function New-UserJson {
         Write-Error "$ErrorMessage"
     }
 }
-function New-VeracodeTeam {
-    param (
-        [parameter(position=0,Mandatory=$True,HelpMessage="Nome da equipe")]
-        $teamName,
-        [parameter(position=1,HelpMessage="Caminho da pasta de templates")]
-        $pastaTemplates = ".\Templates"
-    )
-
+function Get-VeracodeTeamsList {
     try {
-        # Recebe as informações do template
-        $timeTemplate = Get-Content $pastaTemplates\newTeam.json | ConvertFrom-Json
-    
-        # Altera as propriedades
-        $timeTemplate.team_name = $teamName
-    
-        # Salva num novo JSON
-        $novoJSON = "team" + (Get-Date -Format sshhmmddMM) + ".json"
-        $caminhoJSON = "./TEMP/$novoJSON"
-        $timeTemplate | ConvertTo-Json -depth 100 | Out-File "$caminhoJSON"
-        
-        # Cria o time 
-        $retornoAPI = Get-Content $caminhoJSON | http --auth-type=veracode_hmac POST "https://api.veracode.com/api/authn/v2/teams"
-        $retornoAPI = $retornoAPI | ConvertFrom-Json
-        $validador = Debug-VeracodeAPI $retornoAPI
-
-        # Valida se fez a criação
+        $infoTeam = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/teams?all_for_org=true&size=1000" | ConvertFrom-Json
+        $validador = Debug-VeracodeAPI $infoTeam
         if ($validador -eq "OK") {
-            # Pega as infos do usuario
-            $nomeTime = $retornoAPI.team_name
-            $idTime = $retornoAPI.team_id
-            # Exibe a mensagem de confirmação
-            Write-Host "Time criado com sucesso:"
-            Write-Host "$nomeTime"
-            Write-Host "$idTime"
+            $teamList = $infoTeam._embedded.teams.team_name
+            if ($teamList) {
+                return $teamList
+            } else {
+                # Exibe a mensagem de erro
+                Write-Error "Não foram encontrados times"
+            }
+            
         } else {
             # Exibe a mensagem de erro
             Write-Error "Algo não esperado ocorreu"
@@ -158,7 +137,87 @@ function New-VeracodeTeam {
         Write-Error "$ErrorMessage"
     }
 }
+function New-VeracodeTeam {
+    param (
+        [parameter(position=0,Mandatory=$True,HelpMessage="Nome da equipe")]
+        $teamName,
+        [parameter(position=1,HelpMessage="Caminho da pasta de templates")]
+        $pastaTemplates = ".\Templates"
+    )
 
+    try {
+        # Valida se o time já existe
+        $listaTimes = Get-VeracodeTeamsList
+        if ($listaTimes.Contains($teamName)) {
+            Write-Host "O time $teamName já existe"
+        } else {
+            # Recebe as informações do template
+            $timeTemplate = Get-Content $pastaTemplates\newTeam.json | ConvertFrom-Json
+        
+            # Altera as propriedades
+            $timeTemplate.team_name = $teamName
+        
+            # Salva num novo JSON
+            $novoJSON = "team" + (Get-Date -Format sshhmmddMM) + ".json"
+            $caminhoJSON = "./TEMP/$novoJSON"
+            $timeTemplate | ConvertTo-Json -depth 100 | Out-File "$caminhoJSON"
+            
+            # Cria o time 
+            $retornoAPI = Get-Content $caminhoJSON | http --auth-type=veracode_hmac POST "https://api.veracode.com/api/authn/v2/teams"
+            $retornoAPI = $retornoAPI | ConvertFrom-Json
+            $validador = Debug-VeracodeAPI $retornoAPI
+
+            # Valida se fez a criação
+            if ($validador -eq "OK") {
+                # Pega as infos do usuario
+                $nomeTime = $retornoAPI.team_name
+                $idTime = $retornoAPI.team_id
+                # Exibe a mensagem de confirmação
+                Write-Host "Time criado com sucesso:"
+                Write-Host "$nomeTime"
+                Write-Host "$idTime"
+            } else {
+                # Exibe a mensagem de erro
+                Write-Error "Algo não esperado ocorreu"
+            }
+        }
+    }
+    catch {
+        $ErrorMessage = $_.Exception.Message
+        Write-Host "Erro no Powershell:"
+        Write-Error "$ErrorMessage"
+    }
+}
+function Get-VeracodeRoles {
+    param (
+        [parameter(position=0,Mandatory=$True,HelpMessage="Nome do cargo conforme estabelecido no template")]
+        $tipoFuncionario,
+        [parameter(position=1,HelpMessage="Caminho da pasta de templates")]
+        $pastaTemplates = ".\Templates"
+    )
+
+    try {
+        # Valida as roles pelo cargo
+        switch ($tipoFuncionario) {
+            Desenvolvedor { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesDev; Break }
+            QA { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesQa; Break }
+            SOC { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesSoc; Break }
+            DEVOPS { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesSRE; Break }
+            BLUETEAM { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesBlueTeam; Break }
+            Default { Write-Error "Não foi encontrado nenhum perfil para $tipoFuncionario"}
+        }
+
+        # Retorna as roles
+        return $roles
+    }
+    catch {
+        $ErrorMessage = $_.Exception.Message
+        Write-Host "Erro no Powershell:"
+        Write-Error "$ErrorMessage"
+    }   
+}
+
+# Faz a criação do usuario
 try {
     # Inicia o LOG
     $hashData = Get-Date -Format "ddMMyyyy-HHmmss"
@@ -183,7 +242,7 @@ try {
     # Recebe as informações do JSON
     $caminhoJSON = New-UserJson $nome $sobrenome $email $cargo $time
     $infoJSON = Get-Content "$caminhoJSON" | ConvertFrom-Json
-    $roles = $infoJSON.roles
+    $roles = $infoJSON.roles.role_name
 
     # Faz a chamada da API
     $retornoAPI = Get-Content $caminhoJSON | http --auth-type=veracode_hmac POST "https://api.veracode.com/api/authn/v2/users"
@@ -213,3 +272,4 @@ catch {
     Write-Host "Erro no Powershell:"
     Write-Error "$ErrorMessage"
 }
+Stop-Transcript

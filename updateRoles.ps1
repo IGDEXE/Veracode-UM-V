@@ -95,28 +95,23 @@ function Get-VeracodeRoles {
         Write-Error "$ErrorMessage"
     }   
 }
-
-# Dont work
 function Get-UserRoles {
     param (
         [parameter(position=0,Mandatory=$True,HelpMessage="Email da conta conforme cadastrado na Veracode (Caso seja uma conta de API, informar o UserName dela)")]
         $emailUsuario
     )
     try {
-        $infoUsers = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/users?size=1000" | ConvertFrom-Json
+        $urlAPI = "https://api.veracode.com/api/authn/v2/users?user_name=" + $emailUsuario
+        $infoUsers = http --auth-type=veracode_hmac GET "$urlAPI" | ConvertFrom-Json
         $validador = Debug-VeracodeAPI $infoUsers
         if ($validador -eq "OK") {
-            $infoUsers = $infoUsers._embedded.users
-            $userInfo = ($infoUsers | Where-Object { $_.user_name -eq "$emailUsuario" })
-            if ($userInfo) {
-                $nome = $userInfo.first_name
-                $sobrenome = $userInfo.last_name
-                $email = $userInfo.email_address
-                $infoUsuarios = "$nome $sobrenome`n$email"
-                return $infoUsuarios
+            $userRoles = $infoUsers.roles
+            if ($userRoles) {
+                $listaRoles = $userRoles.role_name
+                return $listaRoles
             } else {
                 # Exibe a mensagem de erro
-                Write-Error "Não foi encontrado ID para o usuario: $emailUsuario"
+                Write-Error "Não foram encontradas roles para o usuario: $emailUsuario"
             }
             
         } else {
@@ -135,6 +130,9 @@ try {
     # Recebe o ID do usuario e as roles
     $idUsuario = Get-VeracodeUserID $emailUsuario
     $roles = Get-VeracodeRoles $tipoFuncionario
+
+    # Recebe as roles antigas
+    #$rolesAntigas = Get-UserRoles $emailUsuario
 
     # Atualiza as roles com base no modelo
     $infoUser = Get-Content "$pastaTemplates\extruturaRoles.json" | ConvertFrom-Json
@@ -164,14 +162,13 @@ try {
             Write-Host "Usuario foi atualizado:"
             Write-Host "$nome $sobrenome"
             Write-Host "$Usuario"
-            Write-Host "Novas Roles: $roles"
+            #Write-Host "Roles antigas: $rolesAntigas"
+            Write-Host "Novas Roles: " $roles.role_name
             Write-Host "$data"
         } else {
             Write-Error "Não foi localizado nenhum ID para: $emailUsuario"
-        }
-            
-    }
-    else {
+        }      
+    } else {
         Write-Error "Comportamento não esperado"
     }
 }
@@ -180,3 +177,4 @@ catch {
     Write-Host "Erro no Powershell:"
     Write-Error "$ErrorMessage"
 }
+Stop-Transcript

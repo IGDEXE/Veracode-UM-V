@@ -103,3 +103,4 @@ try {
     Write-Host "Erro no Powershell:"
     Write-Host "$ErrorMessage"
 }
+Stop-Transcript
