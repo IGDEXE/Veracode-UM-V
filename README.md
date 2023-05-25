@@ -38,6 +38,7 @@ Recomendo que consulte a documentação para verificar todos os detalhes:<br>
 https://learn.microsoft.com/pt-br/powershell/scripting/install/installing-powershell-on-linux?view=powershell-7.3<br>
 Esse projeto foi testado no Ubuntu 22.04.1 LTS<br>
 Depois da instalação do Powershell on Linux, basta utilizar sem nenhuma alteração<br>
+Para iniciar o Powershell no Linux, use no terminal o comando: pwsh<br>
 
 # Em implementação:
 Atualização de roles especificas/únicas<br>
