@@ -42,4 +42,3 @@ Para iniciar o Powershell no Linux, use no terminal o comando: pwsh<br>
 
 # Em implementação:
 Atualização de roles especificas/únicas<br>
-LOG de roles antigas no script de atualização de roles<br>

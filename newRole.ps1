@@ -9,25 +9,24 @@ param (
 
 function Get-UserRoles {
     param (
-        [parameter(position = 0, Mandatory = $True, HelpMessage = "Email da conta conforme cadastrado na Veracode (Caso seja uma conta de API, informar o UserName dela)")]
-        $emailUsuario
+        [parameter(position=0,Mandatory=$True,HelpMessage="ID do usuario")]
+        $idUsuario
     )
     try {
-        $infoUsers = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/users/self?user_name=$emailUsuario" | ConvertFrom-Json
+        $urlAPI = "https://api.veracode.com/api/authn/v2/users/" + $idUsuario + "?detailed=true"
+        $infoUsers = http --auth-type=veracode_hmac GET "$urlAPI" | ConvertFrom-Json
         $validador = Debug-VeracodeAPI $infoUsers
         if ($validador -eq "OK") {
             $userRoles = $infoUsers.roles
             if ($userRoles) {
                 $listaRoles = $userRoles.role_name
                 return $listaRoles
-            }
-            else {
+            } else {
                 # Exibe a mensagem de erro
                 Write-Error "Não foram encontradas roles para o usuario: $emailUsuario"
             }
             
-        }
-        else {
+        } else {
             # Exibe a mensagem de erro
             Write-Error "Algo não esperado ocorreu"
         }
@@ -70,9 +69,39 @@ function Debug-VeracodeAPI {
         Write-Host "$ErrorMessage"
     }
 }
+function Get-VeracodeUserID {
+    param (
+        [parameter(position=0,Mandatory=$True,HelpMessage="Email da conta conforme cadastrado na Veracode (Caso seja uma conta de API, informar o UserName dela)")]
+        $emailUsuario
+    )
+    try {
+        $infoUsers = http --auth-type=veracode_hmac GET "https://api.veracode.com/api/authn/v2/users?size=1000" | ConvertFrom-Json
+        $validador = Debug-VeracodeAPI $infoUsers
+        if ($validador -eq "OK") {
+            $infoUsers = $infoUsers._embedded.users
+            $userID = ($infoUsers | Where-Object { $_.user_name -eq "$emailUsuario" }).user_id
+            if ($userID) {
+                return $userID
+            } else {
+                # Exibe a mensagem de erro
+                Write-Error "Não foi encontrado ID para o usuario: $emailUsuario"
+            }
+            
+        } else {
+            # Exibe a mensagem de erro
+            Write-Error "Algo não esperado ocorreu"
+        }
+    }
+    catch {
+        $ErrorMessage = $_.Exception.Message
+        Write-Host "Erro no Powershell:"
+        Write-Host "$ErrorMessage"
+    }
+}
 
-# Recebe as roles antigas
-$rolesAntigas = Get-UserRoles $emailUsuario
+# Recebe o ID do usuario e as roles antigas
+$idUsuario = Get-VeracodeUserID $emailUsuario
+$rolesAntigas = Get-UserRoles $idUsuario
 
 # Atualiza a lista de roles
 $listaRoles = $rolesAntigas + $novaRole

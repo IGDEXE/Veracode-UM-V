@@ -97,11 +97,11 @@ function Get-VeracodeRoles {
 }
 function Get-UserRoles {
     param (
-        [parameter(position=0,Mandatory=$True,HelpMessage="Email da conta conforme cadastrado na Veracode (Caso seja uma conta de API, informar o UserName dela)")]
-        $emailUsuario
+        [parameter(position=0,Mandatory=$True,HelpMessage="ID do usuario")]
+        $idUsuario
     )
     try {
-        $urlAPI = "https://api.veracode.com/api/authn/v2/users?user_name=" + $emailUsuario
+        $urlAPI = "https://api.veracode.com/api/authn/v2/users/" + $idUsuario + "?detailed=true"
         $infoUsers = http --auth-type=veracode_hmac GET "$urlAPI" | ConvertFrom-Json
         $validador = Debug-VeracodeAPI $infoUsers
         if ($validador -eq "OK") {
@@ -132,7 +132,7 @@ try {
     $roles = Get-VeracodeRoles $tipoFuncionario
 
     # Recebe as roles antigas
-    #$rolesAntigas = Get-UserRoles $emailUsuario
+    $rolesAntigas = Get-UserRoles $idUsuario
 
     # Atualiza as roles com base no modelo
     $infoUser = Get-Content "$pastaTemplates\extruturaRoles.json" | ConvertFrom-Json
@@ -162,7 +162,7 @@ try {
             Write-Host "Usuario foi atualizado:"
             Write-Host "$nome $sobrenome"
             Write-Host "$Usuario"
-            #Write-Host "Roles antigas: $rolesAntigas"
+            Write-Host "Roles antigas: $rolesAntigas"
             Write-Host "Novas Roles: " $roles.role_name
             Write-Host "$data"
         } else {
