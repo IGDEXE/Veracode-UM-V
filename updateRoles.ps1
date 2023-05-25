@@ -77,13 +77,18 @@ function Get-VeracodeRoles {
 
     try {
         # Valida as roles pelo cargo
-        switch ($tipoFuncionario) {
-            Desenvolvedor { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesDev; Break }
-            QA { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesQa; Break }
-            SOC { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesSoc; Break }
-            DEVOPS { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesSRE; Break }
-            BLUETEAM { $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesBlueTeam; Break }
-            Default { Write-Error "Não foi encontrado nenhum perfil para $tipoFuncionario"}
+        if ($tipoFuncionario -eq "Desenvolvedor") {
+            $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesDev
+        } elseif ($tipoFuncionario -eq "QA") {
+            $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesQa
+        } elseif ($tipoFuncionario -eq "SOC") {
+            $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesSoc
+        } elseif ($tipoFuncionario -eq "DEVOPS") {
+            $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesSRE
+        } elseif ($tipoFuncionario -eq "BLUETEAM") {
+            $roles = (Get-Content $pastaTemplates\exemploRoles.json | ConvertFrom-Json).rolesBlueTeam
+        } else {
+            Write-Error "Não foi encontrado nenhum perfil para $tipoFuncionario"
         }
 
         # Retorna as roles
