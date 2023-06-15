@@ -13,6 +13,9 @@
     "rolesQa":[
         {
            "role_name":"securityinsightsonly"
+        },
+        {
+           "role_name":"greenlightideuser"
         }
      ],
      "rolesSoc":[
@@ -64,6 +67,9 @@
    "rolesBlueTeam":[
        {
           "role_name":"securityinsightsonly"
+       },
+       {
+          "role_name":"greenlightideuser"
        }
     ]
  }
